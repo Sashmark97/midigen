@@ -31,3 +31,5 @@ TORCH_INT = torch.int32
 TORCH_LABEL_TYPE = torch.long
 
 PREPEND_ZEROS_WIDTH = 4
+
+CPU_DEVICE = torch.device("cpu")
