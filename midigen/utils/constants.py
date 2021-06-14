@@ -33,3 +33,10 @@ TORCH_LABEL_TYPE = torch.long
 PREPEND_ZEROS_WIDTH = 4
 
 CPU_DEVICE = torch.device("cpu")
+
+USE_CUDA = 1
+
+if USE_CUDA:
+    TORCH_CUDA_DEVICE = torch.device("cuda:3")
+else:
+    TORCH_CUDA_DEVICE = None
