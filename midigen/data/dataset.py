@@ -1,4 +1,5 @@
 import torch
+import joblib
 from torch.utils.data import Dataset
 
 from midigen.utils.constants import TORCH_LABEL_TYPE, CPU_DEVICE
@@ -17,10 +18,15 @@ class EPianoDataset(Dataset):
     ----------
     """
 
-    def __init__(self, midi_list, max_seq=2048, random_seq=True):
+    def __init__(self, file_list, max_seq=2048, random_seq=True, num_files=-1):
         self.max_seq = max_seq
         self.random_seq = random_seq
-        self.data_files = midi_list
+        for file in file_list[:num_files]:
+            seqs = joblib.load(file)
+            for seq in seqs:
+                if len(seq) == 0:
+                    continue
+                self.data_files.append(seq)
         # CPU device to enable parallel operations
         self.device = CPU_DEVICE
 
