@@ -1,0 +1,43 @@
+--- !Experiment
+
+# --------------------------------
+# ------- EXPERIMENT CONFIG ------
+# --------------------------------
+
+seed: 1
+save_folder: "/home//storage/3020/db/K_cluster2_backup/TD/test_gpt2_rpr"
+device: &device 'cuda:3'
+num_workers: 4
+tensorboard_logging: on
+batch_size: &batch_size 2
+max_epochs: &max_epochs 1
+val_every_n_batches: 100
+
+# ----------------
+# --- DATASET ---
+# ----------------
+
+data_split_file: '/home/home/MarkelovA/midigen/dataset/data_split_random_80_10_10.pkl'
+max_seq: &max_seq 2048
+random_seq: on
+num_files: 2
+
+# -------------
+# --- MODEL ---
+# -------------
+
+model_config:
+    name: 'GPT'
+    max_seq: *max_seq
+    dim_feedforward: 1024
+    n_layer: 6
+    n_head: 8
+    n_embd: 512
+    enable_rpr: on
+    er_len: *max_seq
+    device: *device
+
+optimizer:
+        class: 'AdamW'
+        parameters:
+            lr: 1.0
