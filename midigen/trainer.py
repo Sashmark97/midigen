@@ -127,7 +127,7 @@ class Trainer(yaml.YAMLObject):
                     bar_train.update(1)
                     self.train_batches_seen += 1
                     self.write_tensorboard(log, mode='train')
-                    if batch_num != 0 and self.train_batches_seen % self.val_every_n_batches == 0:
+                    if batch_num != 0 and self.train_batches_seen % self.val_every_n_batches == 0 and self.val_every_n_batches > 0:
                         self.validate()
 
             self.epoch += 1
