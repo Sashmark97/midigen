@@ -1,5 +1,5 @@
 import torch
-import torch.Tensor as Tensor
+from torch import Tensor
 
 def generate_square_subsequent_mask(sz: int) -> Tensor:
     r"""Generate a square mask for the sequence. The masked positions are filled with float('-inf').

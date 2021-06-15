@@ -14,7 +14,8 @@ from midigen.models.gpt2.utils import GPTConfig
 from midigen.data.dataset import EPianoDataset
 from midigen.metrics.epiano import compute_epiano_accuracy
 from midigen.optim.stepper import LrStepTracker
-from midigen.utils.constants import SCHEDULER_WARMUP_STEPS, TOKEN_PAD, VOCAB_SIZE
+from midigen.utils.constants import SCHEDULER_WARMUP_STEPS, TOKEN_PAD, VOCAB_SIZE,\
+    ADAM_EPSILON, ADAM_BETA_1, ADAM_BETA_2
 
 class Trainer(yaml.YAMLObject):
     yaml_tag = '!Experiment'
@@ -41,16 +42,9 @@ class Trainer(yaml.YAMLObject):
         self.tensorboard_logging = tensorboard_logging
         self.val_every_n_batches = val_every_n_batches
 
-        self.model_config = model_config
-        self._initialize_model()
-
         self.loss = nn.CrossEntropyLoss(ignore_index=TOKEN_PAD)
         self.max_epochs = max_epochs
         self.batch_size = batch_size
-        self.optimizer = getattr(torch.optim, optimizer["class"])(self.model.parameters(), **optimizer["parameters"])
-        # TODO: replace with model.n_embd
-        lr_stepper = LrStepTracker(512, SCHEDULER_WARMUP_STEPS, init_steps=0)
-        self.scheduler = LambdaLR(self.optimizer, lr_stepper.step)
 
         # Initialize datasets / dataloaders
         self.max_seq = max_seq
@@ -60,20 +54,27 @@ class Trainer(yaml.YAMLObject):
             data = pickle.load(f)
 
         self.train_iterator = EPianoDataset(data['train'], max_seq=self.max_seq, random_seq=self.random_seq,
-                                            num_files=self.num_files)
+                                            num_files=self.num_files, type='training')
         self.train_loader = DataLoader(dataset=self.train_iterator, batch_size=self.batch_size, shuffle=True,
                                        num_workers=self.num_workers)
 
         self.val_iterator = EPianoDataset(data['val'], max_seq=self.max_seq, random_seq=self.random_seq,
-                                            num_files=self.num_files)
+                                            num_files=self.num_files, type='validation')
         self.val_loader = DataLoader(dataset=self.val_iterator, batch_size=self.batch_size,
                                      num_workers=self.num_workers)
 
         self.test_iterator = EPianoDataset(data['test'], max_seq=self.max_seq, random_seq=self.random_seq,
-                                           num_files=self.num_files)
+                                           num_files=self.num_files, type='test')
         self.test_loader = DataLoader(dataset=self.test_iterator, batch_size=self.batch_size,
                                       num_workers=self.num_workers)
 
+        self.model_config = model_config
+        self._initialize_model()
+        self.optimizer = getattr(torch.optim, optimizer["class"])(self.model.parameters(), **optimizer["parameters"],
+                                                                  betas=(ADAM_BETA_1, ADAM_BETA_2), eps=ADAM_EPSILON)
+        # TODO: replace with model.n_embd
+        lr_stepper = LrStepTracker(512, SCHEDULER_WARMUP_STEPS, init_steps=0)
+        self.scheduler = LambdaLR(self.optimizer, lr_stepper.step)
         self._fix_seeds()
         self._prepare_dirs()
         if self.tensorboard_logging:

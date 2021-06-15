@@ -5,7 +5,7 @@
 # --------------------------------
 
 seed: 1
-save_folder: "/home/storage/3020/MarkelovA/work/BASELINE_cityscapes_sim10K_regular_main1_bsize2"
+save_folder: "/home//storage/3020/db/K_cluster2_backup/TD/test_gpt2"
 device: &device 'cuda:3'
 num_workers: 4
 tensorboard_logging: on
@@ -41,5 +41,3 @@ optimizer:
         class: 'AdamW'
         parameters:
             lr: 1.0
-            betas: (0.9, 0.999)
-            eps: 10e-9

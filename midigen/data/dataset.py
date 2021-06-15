@@ -1,5 +1,6 @@
 import torch
 import joblib
+from tqdm import tqdm
 from torch.utils.data import Dataset
 
 from midigen.utils.constants import TORCH_LABEL_TYPE, CPU_DEVICE
@@ -18,10 +19,11 @@ class EPianoDataset(Dataset):
     ----------
     """
 
-    def __init__(self, file_list, max_seq=2048, random_seq=True, num_files=-1):
+    def __init__(self, file_list, max_seq=2048, random_seq=True, num_files=-1, type='training'):
         self.max_seq = max_seq
         self.random_seq = random_seq
-        for file in file_list[:num_files]:
+        self.data_files = []
+        for file in tqdm(file_list[:num_files], desc=f'Loading {type} dataset: '):
             seqs = joblib.load(file)
             for seq in seqs:
                 if len(seq) == 0:
