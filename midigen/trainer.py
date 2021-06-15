@@ -10,10 +10,11 @@ from tqdm import tqdm
 import numpy as np
 
 from midigen import models
+from midigen.models.gpt2.utils import GPTConfig
 from midigen.data.dataset import EPianoDataset
 from midigen.metrics.epiano import compute_epiano_accuracy
 from midigen.optim.stepper import LrStepTracker
-from midigen.utils.constants import SCHEDULER_WARMUP_STEPS, TOKEN_PAD
+from midigen.utils.constants import SCHEDULER_WARMUP_STEPS, TOKEN_PAD, VOCAB_SIZE
 
 class Trainer(yaml.YAMLObject):
     yaml_tag = '!Experiment'
@@ -28,9 +29,9 @@ class Trainer(yaml.YAMLObject):
         return dumper.represent_mapping("!Experiment",
                                         obj.get_parameters())
 
-    def __init__(self, seed, save_folder, model, loss, data_split_file,
+    def __init__(self, seed, save_folder, model_config, data_split_file,
                  batch_size, num_workers, tensorboard_logging, device, max_epochs,
-                 max_seq, random_seq, num_files, optimizer):
+                 max_seq, random_seq, num_files, optimizer, val_every_n_batches):
         super().__init__()
         # Initialize general / utility parameters
         self.seed = seed
@@ -38,8 +39,11 @@ class Trainer(yaml.YAMLObject):
         self.num_workers = num_workers
         self.device = device
         self.tensorboard_logging = tensorboard_logging
+        self.val_every_n_batches = val_every_n_batches
 
-        self.model = model
+        self.model_config = model_config
+        self._initialize_model()
+
         self.loss = nn.CrossEntropyLoss(ignore_index=TOKEN_PAD)
         self.max_epochs = max_epochs
         self.batch_size = batch_size
@@ -167,6 +171,16 @@ class Trainer(yaml.YAMLObject):
     def write_tensorboard(self, recieved_data, mode='train'):
         for key in recieved_data.keys():
             self.writer.add_scalar(mode + '/' + key, recieved_data[key])
+
+    def _initialize_model(self):
+        if self.model_config['name'] == 'GPT':
+            config = GPTConfig(VOCAB_SIZE, self.max_seq, dim_feedforward=self.model_config['dim_feedforward'],
+                               n_layer=self.model_config['n_layer'], n_head=self.model_config['n_head'],
+                               n_embd=self.model_config['n_embd'], enable_rpr=self.model_config['enable_rpr'],
+                               er_len=self.model_config['er_len'])
+            self.model = models.GPT(config).to(self.device)
+        else:
+            raise NotImplementedError('MusicTransformer init not implemented yet!')
 
     def _fix_seeds(self):
         """Fixates random seeds for experiment reproducibility."""
