@@ -165,6 +165,7 @@ class Trainer(yaml.YAMLObject):
                     sum_loss += float(out)
                     log['curr_acc'] = sum_acc / (bar_eval.n + 1)
                     log['curr_loss'] = sum_loss / (bar_eval.n + 1)
+                    self.write_tensorboard(log, mode='val')
                     bar_eval.set_description(f'Loss val: {float(out):.4}  Acc: {float(sum_acc / (bar_eval.n + 1)):.4}')
                     bar_eval.update(1)
 
