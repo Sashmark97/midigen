@@ -5,13 +5,13 @@
 # --------------------------------
 
 seed: 1
-save_folder: "/home//storage/3020/db/K_cluster2_backup/TD/test_gpt2"
+save_folder: "/home/storage/3020/db/K_cluster2_backup/TD/test_gpt2"
 device: &device 'cuda:3'
 num_workers: 4
 tensorboard_logging: on
 batch_size: &batch_size 2
-max_epochs: &max_epochs 1
-val_every_n_batches: 100
+max_epochs: &max_epochs 10
+val_every_n_batches: -1
 
 # ----------------
 # --- DATASET ---
@@ -20,7 +20,7 @@ val_every_n_batches: 100
 data_split_file: '/home/home/MarkelovA/midigen/dataset/data_split_random_80_10_10.pkl'
 max_seq: &max_seq 2048
 random_seq: on
-num_files: 2
+num_files: -1
 
 # -------------
 # --- MODEL ---
