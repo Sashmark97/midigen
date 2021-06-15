@@ -32,7 +32,7 @@ class Trainer(yaml.YAMLObject):
 
     def __init__(self, seed, save_folder, model_config, data_split_file,
                  batch_size, num_workers, tensorboard_logging, device, max_epochs,
-                 max_seq, random_seq, num_files, optimizer, val_every_n_batches):
+                 max_seq, random_seq, num_files, optimizer, val_every_n_batches, multi_gpu=[]):
         super().__init__()
         # Initialize general / utility parameters
         self.seed = seed
@@ -68,9 +68,11 @@ class Trainer(yaml.YAMLObject):
                                            num_files=self.num_files, type='test')
         self.test_loader = DataLoader(dataset=self.test_iterator, batch_size=self.batch_size,
                                       num_workers=self.num_workers)
-
+        self.multi_gpu = multi_gpu
         self.model_config = model_config
         self._initialize_model()
+        if len(self.multi_gpu) > 0:
+            self.model = nn.DataParallel(self.model, device_ids=self.multi_gpu)
         self.optimizer = optimizer
         self.optimizer_obj = getattr(torch.optim, self.optimizer["class"])(self.model.parameters(),
                                                                            **self.optimizer["parameters"],
@@ -216,7 +218,8 @@ class Trainer(yaml.YAMLObject):
                     "max_seq": self.max_seq,
                     "random_seq": self.random_seq,
                     "num_files": self.num_files,
-                    "val_every_n_batches": self.val_every_n_batches
+                    "val_every_n_batches": self.val_every_n_batches,
+                    "multi_gpu": self.multi_gpu
         }
         return params
 
@@ -227,9 +230,15 @@ class Trainer(yaml.YAMLObject):
             os.makedirs(self.save_folder)
 
         if save_policy == 'best':
-            self.model.save(os.path.join(self.save_folder, "model"))
+            if isinstance(self.model, nn.DataParallel):
+                self.model.module.save(os.path.join(self.save_folder, "model"))
+            else:
+                self.model.save(os.path.join(self.save_folder, "model"))
         elif save_policy == 'last':
-            self.model.save(os.path.join(self.save_folder, "model_last"))
+            if isinstance(self.model, nn.DataParallel):
+                self.model.module.save(os.path.join(self.save_folder, "model_last"))
+            else:
+                self.model.save(os.path.join(self.save_folder, "model_last"))
 
         torch.save({
             "parameters": self.get_parameters()
