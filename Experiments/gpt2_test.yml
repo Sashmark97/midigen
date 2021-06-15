@@ -11,7 +11,7 @@ num_workers: 4
 tensorboard_logging: on
 batch_size: &batch_size 2
 max_epochs: &max_epochs 1
-val_every_n_batches: -1
+val_every_n_batches: 100
 
 # ----------------
 # --- DATASET ---

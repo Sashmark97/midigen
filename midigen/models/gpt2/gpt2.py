@@ -1,3 +1,4 @@
+import os
 import torch
 import random
 import torch.nn as nn
@@ -29,7 +30,7 @@ class GPT(nn.Module):
 
         self.block_size = config.block_size
         self.apply(self._init_weights)
-
+        self.config = config
 
     def get_block_size(self):
         return self.block_size
@@ -169,3 +170,24 @@ class GPT(nn.Module):
                 print(cur_i, "/", target_seq_length)
 
         return gen_seq[:, :cur_i]
+
+    def get_parameters(self):
+        parameters = {"config": self.config}
+        return parameters
+
+    def save(self, path):
+        folder_path = os.path.dirname(path)
+        if len(folder_path) > 0 and not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        torch.save({
+            "model_state_dict": self.state_dict(),
+            "parameters": self.get_parameters()
+        }, path)
+
+    @classmethod
+    def load(cls, load_path, device='cpu'):
+        checkpoint = torch.load(load_path, map_location=device)
+        parameters = checkpoint["parameters"]
+        model = cls(**parameters).to(device)
+        model.load_state_dict(checkpoint["model_state_dict"])
+        return model

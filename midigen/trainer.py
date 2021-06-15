@@ -50,6 +50,7 @@ class Trainer(yaml.YAMLObject):
         self.max_seq = max_seq
         self.random_seq = random_seq
         self.num_files = num_files
+        self.data_split_file = data_split_file
         with open(data_split_file, 'rb') as f:
             data = pickle.load(f)
 
@@ -70,11 +71,14 @@ class Trainer(yaml.YAMLObject):
 
         self.model_config = model_config
         self._initialize_model()
-        self.optimizer = getattr(torch.optim, optimizer["class"])(self.model.parameters(), **optimizer["parameters"],
-                                                                  betas=(ADAM_BETA_1, ADAM_BETA_2), eps=ADAM_EPSILON)
+        self.optimizer = optimizer
+        self.optimizer_obj = getattr(torch.optim, self.optimizer["class"])(self.model.parameters(),
+                                                                           **self.optimizer["parameters"],
+                                                                           betas=(ADAM_BETA_1, ADAM_BETA_2),
+                                                                           eps=ADAM_EPSILON)
         # TODO: replace with model.n_embd
         lr_stepper = LrStepTracker(512, SCHEDULER_WARMUP_STEPS, init_steps=0)
-        self.scheduler = LambdaLR(self.optimizer, lr_stepper.step)
+        self.scheduler = LambdaLR(self.optimizer_obj, lr_stepper.step)
         self._fix_seeds()
         self._prepare_dirs()
         if self.tensorboard_logging:
@@ -101,7 +105,7 @@ class Trainer(yaml.YAMLObject):
             with tqdm(total=len(self.train_loader)) as bar_train:
                 for batch_num, batch in enumerate(self.train_loader):
                     log = {}
-                    self.optimizer.zero_grad()
+                    self.optimizer_obj.zero_grad()
                     x = batch[0].to(self.device)
                     tgt = batch[1].to(self.device)
 
@@ -114,10 +118,10 @@ class Trainer(yaml.YAMLObject):
                     tgt = tgt.flatten()
                     loss = self.loss.forward(y, tgt)
                     loss.backward()
-                    self.optimizer.step()
+                    self.optimizer_obj.step()
                     self.scheduler.step()
 
-                    lr = self.optimizer.param_groups[0]['lr']
+                    lr = self.optimizer_obj.param_groups[0]['lr']
                     log['lr'] = lr
                     log['loss'] = loss.item()
                     bar_train.set_description(f'Epoch: {self.epoch} Loss: {float(loss.item()):.4} LR: {float(lr):.8}')
@@ -204,13 +208,15 @@ class Trainer(yaml.YAMLObject):
                     "num_workers": self.num_workers,
                     "seed": self.seed,
                     "batch_size": self.batch_size,
-                    "model": self.model,
+                    "model_config": self.model_config,
+                    "optimizer": self.optimizer,
                     "loss": self.loss,
                     "max_epochs": self.max_epochs,
                     "tensorboard_logging": self.tensorboard_logging,
                     "max_seq": self.max_seq,
                     "random_seq": self.random_seq,
-                    "num_files": self.num_files
+                    "num_files": self.num_files,
+                    "val_every_n_batches": self.val_every_n_batches
         }
         return params
 
