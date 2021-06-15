@@ -1,11 +1,11 @@
 # midigen
-Test task for MIDI files generatioin
+Test task for MIDI files generation using GPT-2
 ## Preparation Guide
 1. Clone the repository
 2. Install modules from requirements.txt
 3. Download pre-trained models with script download_models.sh from Saved_models folder
 
-##Training guide
+## Training guide
 1. Choose one of experiments config from Experiments folder or create your own (instructions on these are yet to come)
 2. Run ```python train.py --yaml_path='/path/to/experiment.yml''``` in scripts folder
 
@@ -16,6 +16,20 @@ Test task for MIDI files generatioin
 * If beam is equal to 0 no beam search is used, instead we use regular categorial distribution from token probabilities
 * Number of seqs is number of sequences used as primer to generate MIDI
 
-! Using this library you may encounter torch.device problems. I suggest you change value of TORCH_CUDA_DEVICE in midigen.utils.constants to 
+## !!!
+Using this library you may encounter torch.device problems. I suggest you change value of TORCH_CUDA_DEVICE in midigen.utils.constants to 
 your used device or even disable CUDA by setting USE_CUDA to 0. Later on I will implement constant-agnostic device choice
-to prevent such errors
+to prevent such errors   
+
+
+## Current progress
+- [x] Implement MusicTransformer
+- [x] Implement GPT-2
+- [x] Add RPR support for GPT-2
+- [x] Add beam search to MIDI generation in model
+- [x] Implement training in Trainer
+- [x] Add model saving / loading
+- [x] Implement MIDI generation
+- [ ] Remove get_device() function from everywhere. Replace with single device
+- [ ] Add MusicTransformer support for training/generation if needed
+- [ ] Ensure correctness of beam search generation
