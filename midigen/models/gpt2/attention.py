@@ -8,7 +8,7 @@ from torch.nn.init import xavier_uniform_, xavier_normal_, constant_
 from torch.nn.parameter import Parameter
 from torch.nn.modules.linear import Linear
 
-from midigen.models.gpt1.rpr import multi_head_attention_forward_rpr
+from midigen.models.musictransformer.rpr import multi_head_attention_forward_rpr
 
 
 class CausalSelfAttention(nn.Module):

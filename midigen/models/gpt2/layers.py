@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from midigen.models.gpt1.rpr import MultiheadAttentionRPR
+from midigen.models.musictransformer.rpr import MultiheadAttentionRPR
 from midigen.models.gpt2.attention import CausalSelfAttention
 
 class Block(nn.Module):

@@ -12,7 +12,7 @@ tensorboard_logging: on
 batch_size: &batch_size 2
 max_epochs: &max_epochs 10
 val_every_n_batches: -1
-# multi_gpu: [*device, 'cuda:4']
+multi_gpu: [*device, 'cuda:4']
 
 # ----------------
 # --- DATASET ---

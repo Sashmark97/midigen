@@ -5,8 +5,8 @@ from torch.nn.modules.normalization import LayerNorm
 
 from midigen.utils.constants import VOCAB_SIZE, TORCH_LABEL_TYPE, TOKEN_PAD, TOKEN_END
 from midigen.utils.util import get_device
-from midigen.models.gpt1.layers import DummyDecoder, PositionalEncoding
-from midigen.models.gpt1.rpr import TransformerEncoderLayerRPR, TransformerEncoderRPR
+from midigen.models.musictransformer.layers import DummyDecoder, PositionalEncoding
+from midigen.models.musictransformer.rpr import TransformerEncoderLayerRPR, TransformerEncoderRPR
 
 
 class MusicTransformer(nn.Module):
