@@ -76,8 +76,7 @@ class Trainer(yaml.YAMLObject):
                                                                            **self.optimizer["parameters"],
                                                                            betas=(ADAM_BETA_1, ADAM_BETA_2),
                                                                            eps=ADAM_EPSILON)
-        # TODO: replace with model.n_embd
-        lr_stepper = LrStepTracker(512, SCHEDULER_WARMUP_STEPS, init_steps=0)
+        lr_stepper = LrStepTracker(self.model_config['n_embd'], SCHEDULER_WARMUP_STEPS, init_steps=0)
         self.scheduler = LambdaLR(self.optimizer_obj, lr_stepper.step)
         self._fix_seeds()
         self._prepare_dirs()
