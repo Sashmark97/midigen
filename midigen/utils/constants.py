@@ -37,6 +37,6 @@ CPU_DEVICE = torch.device("cpu")
 USE_CUDA = 1
 
 if USE_CUDA:
-    TORCH_CUDA_DEVICE = torch.device("cuda:3")
+    TORCH_CUDA_DEVICE = torch.device("cuda:0")
 else:
     TORCH_CUDA_DEVICE = None
